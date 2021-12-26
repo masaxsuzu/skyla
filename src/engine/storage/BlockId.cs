@@ -13,6 +13,6 @@ public class BlockId : IBlockId
 
     public override string ToString()
     {
-        return $"{{ \"\": \"{FileName}\", \"\": {Number} }}";
+        return $"{{ \"FileName\": \"{FileName}\", \"Number\": {Number} }}";
     }
 }

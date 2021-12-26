@@ -28,7 +28,7 @@ public class FileManager : IFileManager
     public int BlockSize { get; }
     public IBlockId Append(string fileName)
     {
-        int newBlockNumber = (int)new FileInfo(fileName).Length;
+        int newBlockNumber = Length(fileName);
         BlockId block = new BlockId(fileName, newBlockNumber);
         byte[] bytes = new byte[BlockSize];
         try

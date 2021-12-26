@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - chapter/*
   pull_request:
     branches:
       - main
