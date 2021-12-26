@@ -1,7 +1,7 @@
 debug: fmt build test
 
 fmt:
-	dotnet format src/**/*.csproj
+	dotnet format src/engine/*.csproj
 	dotnet format tests/*.csproj
 
 build:
