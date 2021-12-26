@@ -18,6 +18,10 @@ public class StorageTest : IDisposable
         var parent = new DirectoryInfo(entryPath).Parent;
         var testPath = Path.Combine(parent.FullName, "StorageTest");
         _dir = new DirectoryInfo(testPath);
+        if (!_dir.Exists)
+        {
+            _dir.Create();
+        }
         foreach (var file in _dir.GetFiles())
         {
             file.Delete();
