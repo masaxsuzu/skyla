@@ -18,7 +18,7 @@ public class LogsTest : IDisposable
 #pragma warning disable CS8604
         var entryPath = Assembly.GetEntryAssembly()?.Location;
         var parent = new DirectoryInfo(entryPath).Parent;
-        var testPath = Path.Combine(parent.FullName, "LogTest");
+        var testPath = Path.Combine(parent.FullName, "LogsTest");
         _dir = new DirectoryInfo(testPath);
         if (!_dir.Exists)
         {

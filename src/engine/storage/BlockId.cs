@@ -15,4 +15,24 @@ public class BlockId : IBlockId
     {
         return $"{{ \"FileName\": \"{FileName}\", \"Number\": {Number} }}";
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        else if (obj is BlockId other)
+        {
+            return FileName == other.FileName && Number == other.Number;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public override int GetHashCode()
+    {
+        return FileName.GetHashCode() + Number.GetHashCode();
+    }
 }
