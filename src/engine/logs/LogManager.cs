@@ -29,7 +29,12 @@ public class LogManager : ILogManager
 
     public IEnumerable<byte[]> AsEnumerable()
     {
-        throw new NotImplementedException();
+        Flush();
+        var i = new LogIterator(_fileManager, _currentBlockId);
+        while (i.HasNext)
+        {
+            yield return i.Next();
+        }
     }
 
     public int Append(byte[] record)

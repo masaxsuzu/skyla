@@ -2,7 +2,7 @@ using System.Collections;
 using Skyla.Engine.Files;
 using Skyla.Engine.Interfaces;
 namespace Skyla.Engine.Logs;
-public class LogIterator : IEnumerable<byte[]>
+public class LogIterator
 {
     private readonly IFileManager _file;
     private IBlockId _block;
@@ -18,18 +18,6 @@ public class LogIterator : IEnumerable<byte[]>
         _page = new Page(bytes);
         MoveToBlock(_block);
     }
-    public IEnumerator<byte[]> GetEnumerator()
-    {
-        while (HasNext)
-        {
-            yield return Next();
-        }
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return this.GetEnumerator();
-    }
 
     private void MoveToBlock(IBlockId block)
     {
@@ -38,7 +26,7 @@ public class LogIterator : IEnumerable<byte[]>
         _currentPosition = _boundary;
     }
 
-    private byte[] Next()
+    public byte[] Next()
     {
         if (_currentPosition == _file.BlockSize)
         {
@@ -49,5 +37,5 @@ public class LogIterator : IEnumerable<byte[]>
         _currentPosition += 4 + record.Length;
         return record;
     }
-    private bool HasNext => _currentPosition < _file.BlockSize || _block.Number > 0;
+    public bool HasNext => _currentPosition < _file.BlockSize || _block.Number > 0;
 }

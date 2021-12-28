@@ -65,7 +65,9 @@ public class FileManager : IFileManager
             {
                 FileStream f = GetOpenFile(block.FileName);
                 f.Seek(block.Number * BlockSize, SeekOrigin.Begin);
-                f.CopyTo(page.Contents);
+                var bytes = new byte[BlockSize];
+                f.Read(bytes, 0, BlockSize);
+                page.Contents.Write(bytes, 0, BlockSize);
             }
             catch (IOException ex)
             {

@@ -39,7 +39,7 @@ public class BufferManager : IBufferManager
         {
             try
             {
-                long timeStamp = System.DateTime.UtcNow.Millisecond;
+                long timeStamp = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
                 Buffer? buffer = TryToPin(block);
                 while (buffer == null && !WaitingTooLong(timeStamp))
                 {
@@ -84,7 +84,7 @@ public class BufferManager : IBufferManager
 
     private bool WaitingTooLong(long from)
     {
-        return from + MaximumWaitTimeMilliSecond < System.DateTime.UtcNow.Millisecond;
+        return from + MaximumWaitTimeMilliSecond < ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
     }
 
     private Buffer? TryToPin(IBlockId block)
