@@ -1,7 +1,7 @@
 using System.Text;
 using FlatBuffers;
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Storage;
+namespace Skyla.Engine.Files;
 public class Page : IPage
 {
     private static readonly Encoding encoding = Encoding.ASCII;

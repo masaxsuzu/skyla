@@ -1,6 +1,6 @@
 using Skyla.Engine.Exceptions;
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Storage;
+namespace Skyla.Engine.Files;
 public class FileManager : IFileManager
 {
     private Dictionary<string, FileStream> _openFiles;

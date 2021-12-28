@@ -2,21 +2,21 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Skyla.Engine.Files;
 using Skyla.Engine.Interfaces;
-using Skyla.Engine.Storage;
 using Xunit;
 namespace Skyla.Tests;
 
-public class StorageTest : IDisposable
+public class FilesTest : IDisposable
 {
     private DirectoryInfo _dir;
-    public StorageTest()
+    public FilesTest()
     {
 #pragma warning disable CS8602
 #pragma warning disable CS8604
         var entryPath = Assembly.GetEntryAssembly()?.Location;
         var parent = new DirectoryInfo(entryPath).Parent;
-        var testPath = Path.Combine(parent.FullName, "StorageTest");
+        var testPath = Path.Combine(parent.FullName, "FilesTest");
         _dir = new DirectoryInfo(testPath);
         if (!_dir.Exists)
         {
