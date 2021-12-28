@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 namespace Skyla.Engine.Interfaces;
 
 public interface ILogManager
