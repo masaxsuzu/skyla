@@ -23,6 +23,13 @@ public class SetIntLogRecord : ILogRecord
         int vpos = opos + 4;
         _value = page.Get(vpos, new IntegerType());
     }
+    public SetIntLogRecord(int transactionNumber, IBlockId block, int offset, int value)
+    {
+        _transactionNumber = transactionNumber;
+        _block = block;
+        _offset = offset;
+        _value = value;
+    }
     public int Operation => 4;
 
     public int TransactionNumber => _transactionNumber;
@@ -39,22 +46,22 @@ public class SetIntLogRecord : ILogRecord
         return $"<SETINT {_transactionNumber} {_block} {_offset} {_value}>";
     }
 
-    public static int WriteToLog(ILogManager logManager, int transactionNumber, IBlockId block, int offset, int value)
+    public int WriteToLog(ILogManager logManager)
     {
         var dummyPage = new Page(0);
         int tpos = 4;
         int fpos = tpos + 4;
-        int bpos = fpos + dummyPage.Length(new StringType(), block.FileName);
+        int bpos = fpos + dummyPage.Length(new StringType(), _block.FileName);
         int opos = bpos + 4;
         int vpos = opos + 4;
         byte[] record = new byte[vpos + 4];
         Page p = new Page(record);
         p.Set(0, new IntegerType(), 4);
-        p.Set(tpos, new IntegerType(), transactionNumber);
-        p.Set(fpos, new StringType(), block.FileName);
-        p.Set(bpos, new IntegerType(), block.Number);
-        p.Set(opos, new IntegerType(), offset);
-        p.Set(vpos, new IntegerType(), value);
+        p.Set(tpos, new IntegerType(), _transactionNumber);
+        p.Set(fpos, new StringType(), _block.FileName);
+        p.Set(bpos, new IntegerType(), _block.Number);
+        p.Set(opos, new IntegerType(), _offset);
+        p.Set(vpos, new IntegerType(), _value);
         return logManager.Append(record);
     }
 }

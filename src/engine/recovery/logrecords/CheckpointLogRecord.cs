@@ -18,7 +18,7 @@ public class CheckpointLogRecord : ILogRecord
         return "<CHECKPOINT>";
     }
 
-    public static int WriteToLog(ILogManager logManager)
+    public int WriteToLog(ILogManager logManager)
     {
         var record = new byte[4];
         var p = new Page(record);

@@ -19,12 +19,12 @@ public class RecoveryManager : IRecoveryManager
         _bufferManager = bufferManager;
         _transaction = transaction;
         _transactionNumber = transactionNumber;
-        LogRecords.StartLogRecord.WriteToLog(logManager, transactionNumber);
+        new LogRecords.StartLogRecord(transactionNumber).WriteToLog(logManager);
     }
     public void Commit()
     {
         _bufferManager.FlushAll(_transactionNumber);
-        int lsNumber = LogRecords.CommitLogRecord.WriteToLog(_logManager, _transactionNumber);
+        int lsNumber = new LogRecords.CommitLogRecord(_transactionNumber).WriteToLog(_logManager);
         _logManager.Flush(lsNumber);
     }
 
@@ -32,7 +32,7 @@ public class RecoveryManager : IRecoveryManager
     {
         DoRecover();
         _bufferManager.FlushAll(_transactionNumber);
-        int lsNumber = LogRecords.CheckpointLogRecord.WriteToLog(_logManager);
+        int lsNumber = new LogRecords.CheckpointLogRecord().WriteToLog(_logManager);
         _logManager.Flush(lsNumber);
     }
 
@@ -40,7 +40,7 @@ public class RecoveryManager : IRecoveryManager
     {
         DoRollback();
         _bufferManager.FlushAll(_transactionNumber);
-        int lsNumber = LogRecords.RollbackLogRecord.WriteToLog(_logManager, _transactionNumber);
+        int lsNumber = new LogRecords.RollbackLogRecord(_transactionNumber).WriteToLog(_logManager);
         _logManager.Flush(lsNumber);
     }
 
@@ -52,7 +52,7 @@ public class RecoveryManager : IRecoveryManager
         {
             throw new EngineException("unreachable");
         }
-        return LogRecords.SetIntLogRecord.WriteToLog(_logManager, _transactionNumber, block, offset, old);
+        return new LogRecords.SetIntLogRecord(_transactionNumber, block, offset, old).WriteToLog(_logManager);
     }
 
     public int SetString(IBuffer buffer, int offset, string value)
@@ -63,7 +63,7 @@ public class RecoveryManager : IRecoveryManager
         {
             throw new EngineException("unreachable");
         }
-        return LogRecords.SetStringLogRecord.WriteToLog(_logManager, _transactionNumber, block, offset, old);
+        return new LogRecords.SetStringLogRecord(_transactionNumber, block, offset, old).WriteToLog(_logManager);
     }
 
     private void DoRollback()
