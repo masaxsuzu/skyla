@@ -61,14 +61,14 @@ public class Transaction : ITransaction
     {
         _concurrencyManager.GetSharedLock(block);
         var buffer = _buffers.Get(block);
-        return buffer.Contents.GetInt(offset);
+        return buffer.Contents.Get(offset, new IntegerType());
     }
 
     public string Getstring(IBlockId block, int offset)
     {
         _concurrencyManager.GetSharedLock(block);
         var buffer = _buffers.Get(block);
-        return buffer.Contents.GetString(offset);
+        return buffer.Contents.Get(offset, new StringType());
     }
 
 
@@ -82,7 +82,7 @@ public class Transaction : ITransaction
             lsNumber = _recoveryManager.SetInt(buffer, offset, value);
         }
         var page = buffer.Contents;
-        page.SetInt(offset, value);
+        page.Set(offset, new IntegerType(), value);
         buffer.SetModified(_transactionNumber, lsNumber);
     }
 
@@ -96,7 +96,7 @@ public class Transaction : ITransaction
             lsNumber = _recoveryManager.SetString(buffer, offset, value);
         }
         var page = buffer.Contents;
-        page.SetString(offset, value);
+        page.Set(offset, new StringType(), value);
         buffer.SetModified(_transactionNumber, lsNumber);
     }
 

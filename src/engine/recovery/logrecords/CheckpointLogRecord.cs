@@ -22,7 +22,7 @@ public class CheckpointLogRecord : ILogRecord
     {
         var record = new byte[4];
         var p = new Page(record);
-        p.SetInt(0, 0);
+        p.Set(0, new IntegerType(), 0);
         return logManager.Append(record);
     }
 }

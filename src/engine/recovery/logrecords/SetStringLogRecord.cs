@@ -12,16 +12,16 @@ public class SetStringLogRecord : ILogRecord
     public SetStringLogRecord(IPage page)
     {
         int tpos = 4;
-        _transactionNumber = page.GetInt(tpos);
+        _transactionNumber = page.Get(tpos, new IntegerType());
         int fpos = tpos + 4;
-        var fileName = page.GetString(fpos);
-        int bpos = fpos + page.MaxLength(fileName.Length);
-        int blockNumber = page.GetInt(bpos);
+        var fileName = page.Get(fpos, new StringType());
+        int bpos = fpos + page.Length(new StringType(), fileName);
+        int blockNumber = page.Get(bpos, new IntegerType());
         _block = new BlockId(fileName, blockNumber);
         int opos = bpos + 4;
-        _offset = page.GetInt(opos);
+        _offset = page.Get(opos, new IntegerType());
         int vpos = opos + 4;
-        _value = page.GetString(vpos);
+        _value = page.Get(vpos, new StringType());
     }
     public int Operation => 5;
 
@@ -44,17 +44,17 @@ public class SetStringLogRecord : ILogRecord
         var dummyPage = new Page(0);
         int tpos = 4;
         int fpos = tpos + 4;
-        int bpos = fpos + dummyPage.MaxLength(block.FileName.Length);
+        int bpos = fpos + dummyPage.Length(new StringType(), block.FileName);
         int opos = bpos + 4;
         int vpos = opos + 4;
-        byte[] record = new byte[vpos + dummyPage.MaxLength(value.Length)];
+        byte[] record = new byte[vpos + dummyPage.Length(new StringType(), value)];
         Page p = new Page(record);
-        p.SetInt(0, 5);
-        p.SetInt(tpos, transactionNumber);
-        p.SetString(fpos, block.FileName);
-        p.SetInt(bpos, block.Number);
-        p.SetInt(opos, offset);
-        p.SetString(vpos, value);
+        p.Set(0, new IntegerType(), 5);
+        p.Set(tpos, new IntegerType(), transactionNumber);
+        p.Set(fpos, new StringType(), block.FileName);
+        p.Set(bpos, new IntegerType(), block.Number);
+        p.Set(opos, new IntegerType(), offset);
+        p.Set(vpos, new StringType(), value);
         return logManager.Append(record);
     }
 }

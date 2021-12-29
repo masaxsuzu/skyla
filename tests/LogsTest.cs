@@ -11,6 +11,9 @@ namespace Skyla.Tests;
 
 public class LogsTest : IDisposable
 {
+    private static IntegerType _iSize = new IntegerType();
+    private static StringType _sSize = new StringType();
+
     private DirectoryInfo _dir;
     public LogsTest()
     {
@@ -46,7 +49,7 @@ public class LogsTest : IDisposable
             var file = new FileManager(_dir, 400);
             var log = new LogManager(file, Guid.NewGuid().ToString());
             CreateRecords(log, file, 1, 35);
-            Assert.Equal(28, log.GetInternalLastSavedLsNumber);
+            Assert.Equal(20, log.GetInternalLastSavedLsNumber);
 
             CreateRecords(log, file, 36, 70);
             log.Flush(65);
@@ -69,11 +72,11 @@ public class LogsTest : IDisposable
     }
     private static byte[] CreateLogRecord(LogManager log, FileManager file, string str, int number)
     {
-        int numberPosition = log.GetInternalPage.MaxLength(str.Length);
+        int numberPosition = log.GetInternalPage.Length(_sSize, str);
         byte[] bytes = new byte[numberPosition + 4];
         var page = new Page(bytes);
-        page.SetString(0, str);
-        page.SetInt(numberPosition, number);
+        page.Set(0, _sSize, str);
+        page.Set(numberPosition, _iSize, number);
         return bytes;
     }
 }

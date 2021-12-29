@@ -4,7 +4,6 @@ using Skyla.Engine.Interfaces;
 namespace Skyla.Engine.Files;
 public class Page : IPage
 {
-    private static readonly Encoding encoding = Encoding.ASCII;
     private ByteBuffer _buffer;
     public Page(int blockSize)
     {
@@ -14,15 +13,35 @@ public class Page : IPage
     {
         _buffer = new ByteBuffer(bytes);
     }
-    public int GetInt(int offset)
+    public T Get<T>(int offset, IFixedLengthType<T> size)
     {
-        return _buffer.GetInt(offset);
+        byte[] bytes = new byte[size.Length];
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            bytes[i] = _buffer.Get(offset + i);
+        }
+        return size.Decode(bytes);
     }
-    public void SetInt(int offset, int number)
+    public void Set<T>(int offset, IFixedLengthType<T> size, T value)
     {
-        _buffer.PutInt(offset, number);
+        byte[] bytes = size.Encode(value);
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            _buffer.Put(offset + i, bytes[i]);
+        }
     }
-    public byte[] GetBytes(int offset)
+
+    public T Get<T>(int offset, IVariableLengthType<T> size)
+    {
+        byte[] bytes = GetBytes(offset);
+        return size.Decode(bytes);
+    }
+    public void Set<T>(int offset, IVariableLengthType<T> size, T value)
+    {
+        var bytes = size.Encode(value);
+        SetBytes(offset, bytes);
+    }
+    private byte[] GetBytes(int offset)
     {
         _buffer.Position = offset;
         int len = _buffer.GetInt(offset);
@@ -33,7 +52,7 @@ public class Page : IPage
         }
         return bytes;
     }
-    public void SetBytes(int offset, byte[] bytes)
+    private void SetBytes(int offset, byte[] bytes)
     {
         _buffer.Position = offset;
         _buffer.PutInt(offset, bytes.Length);
@@ -42,19 +61,15 @@ public class Page : IPage
             _buffer.PutByte(offset + 4 + i, bytes[i]);
         }
     }
-    public string GetString(int offset)
+
+    public int Length<T>(IFixedLengthType<T> size)
     {
-        var bytes = GetBytes(offset);
-        return encoding.GetString(bytes);
+        return size.Length;
     }
-    public void SetString(int offset, string str)
+
+    public int Length<T>(IVariableLengthType<T> size, T value)
     {
-        var bytes = encoding.GetBytes(str);
-        SetBytes(offset, bytes);
-    }
-    public int MaxLength(int strLength)
-    {
-        return 4 + strLength * encoding.GetMaxByteCount(1);
+        return new IntegerType().Length + size.Length(value);
     }
     public Stream Contents
     {

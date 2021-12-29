@@ -41,7 +41,7 @@ public class LogManager : ILogManager
     {
         lock (this)
         {
-            int boundary = _logPage.GetInt(0);
+            int boundary = _logPage.Get(0, new IntegerType());
             int recordSize = record.Length;
             int bytesNeeded = recordSize + 4;
 
@@ -49,12 +49,12 @@ public class LogManager : ILogManager
             {
                 Flush();
                 _currentBlockId = AppendNewBlock();
-                boundary = _logPage.GetInt(0);
+                boundary = _logPage.Get(0, new IntegerType());
             }
 
             int recordPosition = boundary - bytesNeeded;
-            _logPage.SetBytes(recordPosition, record);
-            _logPage.SetInt(0, recordPosition);
+            _logPage.Set(recordPosition, new ByteArrayType(), record);
+            _logPage.Set(0, new IntegerType(), recordPosition);
             _lastLsNumber += 1;
             return _lastLsNumber;
         }
@@ -71,7 +71,7 @@ public class LogManager : ILogManager
     private IBlockId AppendNewBlock()
     {
         IBlockId blockId = _fileManager.Append(_logFileName);
-        _logPage.SetInt(0, _fileManager.BlockSize);
+        _logPage.Set(0, new IntegerType(), _fileManager.BlockSize);
         _fileManager.Write(blockId, _logPage);
         return blockId;
     }

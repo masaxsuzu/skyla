@@ -3,12 +3,11 @@ namespace Skyla.Engine.Interfaces;
 
 public interface IPage
 {
-    int GetInt(int offset);
-    void SetInt(int offset, int number);
-    byte[] GetBytes(int offset);
-    void SetBytes(int offset, byte[] bytes);
-    string GetString(int offset);
-    void SetString(int offset, string str);
-    int MaxLength(int strLength);
+    T Get<T>(int offset, IFixedLengthType<T> fixedLength);
+    void Set<T>(int offset, IFixedLengthType<T> fixedLength, T value);
+    T Get<T>(int offset, IVariableLengthType<T> variableLength);
+    void Set<T>(int offset, IVariableLengthType<T> variableLength, T value);
+    int Length<T>(IFixedLengthType<T> fixedLength);
+    int Length<T>(IVariableLengthType<T> variableLength, T value);
     Stream Contents { get; }
 }

@@ -46,7 +46,7 @@ public class RecoveryManager : IRecoveryManager
 
     public int SetInt(IBuffer buffer, int offset, int value)
     {
-        int old = buffer.Contents.GetInt(offset);
+        int old = buffer.Contents.Get(offset, new IntegerType());
         var block = buffer.Block;
         if (block == null)
         {
@@ -57,7 +57,7 @@ public class RecoveryManager : IRecoveryManager
 
     public int SetString(IBuffer buffer, int offset, string value)
     {
-        string old = buffer.Contents.GetString(offset);
+        string old = buffer.Contents.Get(offset, new StringType());
         var block = buffer.Block;
         if (block == null)
         {
@@ -109,7 +109,7 @@ public class RecoveryManager : IRecoveryManager
     private static ILogRecord CreateFrom(byte[] log)
     {
         var page = new Page(log);
-        var type = page.GetInt(0);
+        var type = page.Get(0, new IntegerType());
         switch (type)
         {
             case 0: // checkpoint

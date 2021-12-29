@@ -9,7 +9,7 @@ public class CommitLogRecord : ILogRecord
     public CommitLogRecord(IPage page)
     {
         int pos = 4;
-        _transactionNumber = page.GetInt(pos);
+        _transactionNumber = page.Get(pos, new IntegerType());
     }
     public int Operation => 2;
 
@@ -28,8 +28,8 @@ public class CommitLogRecord : ILogRecord
     {
         var record = new byte[2 * 4];
         var p = new Page(record);
-        p.SetInt(0, 2);
-        p.SetInt(4, transactionNumber);
+        p.Set(0, new IntegerType(), 2);
+        p.Set(4, new IntegerType(), transactionNumber);
         return logManager.Append(record);
     }
 }

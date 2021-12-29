@@ -22,7 +22,7 @@ public class LogIterator
     private void MoveToBlock(IBlockId block)
     {
         _file.Read(block, _page);
-        _boundary = _page.GetInt(0);
+        _boundary = _page.Get(0, new IntegerType());
         _currentPosition = _boundary;
     }
 
@@ -33,7 +33,7 @@ public class LogIterator
             _block = new BlockId(_block.FileName, _block.Number - 1);
             MoveToBlock(_block);
         }
-        byte[] record = _page.GetBytes(_currentPosition);
+        byte[] record = _page.Get(_currentPosition, new ByteArrayType());
         _currentPosition += 4 + record.Length;
         return record;
     }
