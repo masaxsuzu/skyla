@@ -75,7 +75,7 @@ public class LockTable : ILockTable
             int lockedValue = LockedValue(block);
             if (lockedValue > 1)
             {
-                _locks.Add(block, lockedValue - 1);
+                _locks.Put(block, lockedValue - 1);
             }
             else
             {

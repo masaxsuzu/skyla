@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Skyla.Engine.Buffers;
 using Skyla.Engine.Files;
 using Skyla.Engine.Logs;
@@ -78,5 +79,56 @@ public class TransactionsTest : IDisposable
 
         Assert.Equal(2, n2);
         Assert.Equal("two", s2);
+    }
+
+    [Fact]
+
+    public async Task ConcurrencyTest()
+    {
+        var file = new FileManager(_dir, 400);
+        var log = new LogManager(file, Guid.NewGuid().ToString());
+        var buffer = new BufferManager(file, log, 2);
+
+        var blockName = Guid.NewGuid().ToString();
+        var block1 = new BlockId(blockName, 1);
+        var block2 = new BlockId(blockName, 2);
+
+        var tx1 = new Transaction(file, log, buffer);
+        var tx2 = new Transaction(file, log, buffer);
+        var tx3 = new Transaction(file, log, buffer);
+        tx1.Pin(block1);
+        tx2.Pin(block1);
+        tx3.Pin(block1);
+        tx1.Pin(block2);
+        tx2.Pin(block2);
+        tx3.Pin(block2);
+
+        // Any can obtain shared locks if there is no x-lock.
+        tx1.GetInt(block1, 0);
+        tx1.GetInt(block2, 0);
+        tx2.GetInt(block1, 0);
+        tx3.GetInt(block2, 0);
+        tx1.Commit();
+
+        // Some can obtain exclusive locks if only it has shared locks. 
+        tx2.SetInt(block1, 0, 1, false);
+        tx3.SetInt(block2, 0, 2, true);
+
+        tx2.Commit();
+        tx3.Commit();
+
+        var tx4 = new Transaction(file, log, buffer);
+
+        tx4.Pin(block1);
+        tx4.Pin(block2);
+
+        var v1 = tx4.GetInt(block1, 0);
+        var v2 = tx4.GetInt(block2, 0);
+        tx4.Rollback();
+
+        Assert.Equal(1, v1);
+        Assert.Equal(2, v2);
+
+        await Task.Delay(0);
     }
 }
