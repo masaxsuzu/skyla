@@ -1,7 +1,7 @@
-using System.Text;
 using FlatBuffers;
+using Skyla.Engine.Format;
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Files;
+namespace Skyla.Engine.Buffers;
 public class Page : IPage
 {
     private ByteBuffer _buffer;

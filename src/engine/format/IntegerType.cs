@@ -1,7 +1,7 @@
 using System.Text;
 using FlatBuffers;
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Files;
+namespace Skyla.Engine.Format;
 public struct IntegerType : IFixedLengthType<int>
 {
     public int Length => 4;

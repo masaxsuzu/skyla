@@ -1,7 +1,7 @@
-using Skyla.Engine.Exceptions;
-using Skyla.Engine.Files;
+using Skyla.Engine.Buffers;
+using Skyla.Engine.Format;
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Recovery.LogRecords;
+namespace Skyla.Engine.Logs;
 
 public class CommitLogRecord : ILogRecord
 {

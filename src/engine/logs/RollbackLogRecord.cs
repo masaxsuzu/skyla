@@ -1,21 +1,21 @@
-using Skyla.Engine.Exceptions;
-using Skyla.Engine.Files;
+using Skyla.Engine.Buffers;
+using Skyla.Engine.Format;
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Recovery.LogRecords;
+namespace Skyla.Engine.Logs;
 
-public class StartLogRecord : ILogRecord
+public class RollbackLogRecord : ILogRecord
 {
     private readonly int _transactionNumber;
-    public StartLogRecord(IPage page)
+    public RollbackLogRecord(IPage page)
     {
         int pos = 4;
         _transactionNumber = page.Get(pos, new IntegerType());
     }
-    public StartLogRecord(int transactionNumber)
+    public RollbackLogRecord(int transactionNumber)
     {
         _transactionNumber = transactionNumber;
     }
-    public int Operation => 1;
+    public int Operation => 3;
 
     public int TransactionNumber => _transactionNumber;
 
@@ -25,14 +25,14 @@ public class StartLogRecord : ILogRecord
 
     public override string ToString()
     {
-        return $"<START {_transactionNumber}>";
+        return $"<Rollback {_transactionNumber}>";
     }
 
     public int WriteToLog(ILogManager logManager)
     {
         var record = new byte[2 * 4];
         var p = new Page(record);
-        p.Set(0, new IntegerType(), 1);
+        p.Set(0, new IntegerType(), 3);
         p.Set(4, new IntegerType(), _transactionNumber);
         return logManager.Append(record);
     }

@@ -1,7 +1,9 @@
+using Skyla.Engine.Buffers;
 using Skyla.Engine.Exceptions;
-using Skyla.Engine.Files;
+using Skyla.Engine.Format;
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Recovery;
+using Skyla.Engine.Logs;
+namespace Skyla.Engine.Transactions;
 
 public class RecoveryManager : IRecoveryManager
 {
@@ -19,12 +21,12 @@ public class RecoveryManager : IRecoveryManager
         _bufferManager = bufferManager;
         _transaction = transaction;
         _transactionNumber = transactionNumber;
-        new LogRecords.StartLogRecord(transactionNumber).WriteToLog(logManager);
+        new StartLogRecord(transactionNumber).WriteToLog(logManager);
     }
     public void Commit()
     {
         _bufferManager.FlushAll(_transactionNumber);
-        int lsNumber = new LogRecords.CommitLogRecord(_transactionNumber).WriteToLog(_logManager);
+        int lsNumber = new CommitLogRecord(_transactionNumber).WriteToLog(_logManager);
         _logManager.Flush(lsNumber);
     }
 
@@ -32,7 +34,7 @@ public class RecoveryManager : IRecoveryManager
     {
         DoRecover();
         _bufferManager.FlushAll(_transactionNumber);
-        int lsNumber = new LogRecords.CheckpointLogRecord().WriteToLog(_logManager);
+        int lsNumber = new CheckpointLogRecord().WriteToLog(_logManager);
         _logManager.Flush(lsNumber);
     }
 
@@ -40,7 +42,7 @@ public class RecoveryManager : IRecoveryManager
     {
         DoRollback();
         _bufferManager.FlushAll(_transactionNumber);
-        int lsNumber = new LogRecords.RollbackLogRecord(_transactionNumber).WriteToLog(_logManager);
+        int lsNumber = new RollbackLogRecord(_transactionNumber).WriteToLog(_logManager);
         _logManager.Flush(lsNumber);
     }
 
@@ -52,7 +54,7 @@ public class RecoveryManager : IRecoveryManager
         {
             throw new EngineException("unreachable");
         }
-        return new LogRecords.SetIntLogRecord(_transactionNumber, block, offset, old).WriteToLog(_logManager);
+        return new SetIntLogRecord(_transactionNumber, block, offset, old).WriteToLog(_logManager);
     }
 
     public int SetString(IBuffer buffer, int offset, string value)
@@ -63,7 +65,7 @@ public class RecoveryManager : IRecoveryManager
         {
             throw new EngineException("unreachable");
         }
-        return new LogRecords.SetStringLogRecord(_transactionNumber, block, offset, old).WriteToLog(_logManager);
+        return new SetStringLogRecord(_transactionNumber, block, offset, old).WriteToLog(_logManager);
     }
 
     private void DoRollback()
@@ -113,17 +115,17 @@ public class RecoveryManager : IRecoveryManager
         switch (type)
         {
             case 0: // checkpoint
-                return new LogRecords.CheckpointLogRecord();
+                return new CheckpointLogRecord();
             case 1: // start
-                return new LogRecords.StartLogRecord(page);
+                return new StartLogRecord(page);
             case 2: // commit
-                return new LogRecords.CommitLogRecord(page);
+                return new CommitLogRecord(page);
             case 3: // rollback
-                return new LogRecords.RollbackLogRecord(page);
+                return new RollbackLogRecord(page);
             case 4: // int
-                return new LogRecords.SetIntLogRecord(page);
+                return new SetIntLogRecord(page);
             case 5: // string
-                return new LogRecords.SetStringLogRecord(page);
+                return new SetStringLogRecord(page);
             default:
                 throw new EngineException($"unsupported log record type {type}");
         }

@@ -1,5 +1,5 @@
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Files;
+namespace Skyla.Engine.Format;
 
 public record BlockId(string FileName, int Number) : IBlockId
 {
