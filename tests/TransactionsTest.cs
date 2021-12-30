@@ -57,7 +57,7 @@ public class TransactionsTest : IDisposable
         var tx2 = new Transaction(file, log, buffer);
         tx2.Pin(block);
         int n1 = tx2.GetInt(block, 80);
-        string s1 = tx2.Getstring(block, 40);
+        string s1 = tx2.GetString(block, 40);
 
         Assert.Equal(1, n1);
         Assert.Equal("one", s1);
@@ -75,7 +75,7 @@ public class TransactionsTest : IDisposable
         var tx4 = new Transaction(file, log, buffer);
         tx4.Pin(block);
         int n2 = tx4.GetInt(block, 80);
-        string s2 = tx4.Getstring(block, 40);
+        string s2 = tx4.GetString(block, 40);
 
         Assert.Equal(2, n2);
         Assert.Equal("two", s2);

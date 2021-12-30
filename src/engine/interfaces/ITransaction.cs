@@ -9,7 +9,7 @@ public interface ITransaction
     void UnPin(IBlockId block);
     int GetInt(IBlockId block, int offset);
     void SetInt(IBlockId block, int offset, int value, bool toLog);
-    string Getstring(IBlockId block, int offset);
+    string GetString(IBlockId block, int offset);
     void SetString(IBlockId block, int offset, string value, bool toLog);
     int AvailableBuffers { get; }
     int Size(string fileName);

@@ -62,7 +62,7 @@ public class Transaction : ITransaction
         return buffer.Contents.Get(offset, new IntegerType());
     }
 
-    public string Getstring(IBlockId block, int offset)
+    public string GetString(IBlockId block, int offset)
     {
         _concurrencyManager.GetSharedLock(block);
         var buffer = _buffers.Get(block);

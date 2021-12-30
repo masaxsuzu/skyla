@@ -1,4 +1,5 @@
 using FlatBuffers;
+using Skyla.Engine.Exceptions;
 using Skyla.Engine.Format;
 using Skyla.Engine.Interfaces;
 namespace Skyla.Engine.Buffers;
@@ -34,11 +35,22 @@ public class Page : IPage
     public T Get<T>(int offset, IVariableLengthType<T> size)
     {
         byte[] bytes = GetBytes(offset);
-        return size.Decode(bytes);
+        T value = size.Decode(bytes);
+        var len = size.Length(value);
+        if (len < bytes.Length)
+        {
+            throw new EngineException($"length of {value} must be less than ${len + 1}");
+        }
+        return value;
     }
     public void Set<T>(int offset, IVariableLengthType<T> size, T value)
     {
+        var len = size.Length(value);
         var bytes = size.Encode(value);
+        if (len < bytes.Length)
+        {
+            throw new EngineException($"length of {value} must be less than {len + 1}");
+        }
         SetBytes(offset, bytes);
     }
     private byte[] GetBytes(int offset)

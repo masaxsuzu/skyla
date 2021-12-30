@@ -6,16 +6,17 @@ public struct StringType : IVariableLengthType<string>
 {
     public int Length(string value)
     {
-        return Encode(value).Length;
+        var count = new System.Globalization.StringInfo(value).LengthInTextElements;
+        return Encoding.Unicode.GetMaxByteCount(count);
     }
 
     public string Decode(byte[] bytes)
     {
-        return Encoding.UTF8.GetString(bytes);
+        return Encoding.Unicode.GetString(bytes);
     }
 
     public byte[] Encode(string value)
     {
-        return Encoding.UTF8.GetBytes(value);
+        return Encoding.Unicode.GetBytes(value);
     }
 }

@@ -43,7 +43,7 @@ public class FilesTest : IDisposable
     {
         var (pos1, str1) = (88, "abcdefghijklm");
         int num2 = 345;
-        var (pos3, str3) = (2, "𩸽はサロゲートペアだよ🙇‍♂️。");
+        var (pos3, str3) = (2, "𩸽");
 
         var manager = new FileManager(_dir, 400);
 

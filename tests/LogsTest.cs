@@ -49,7 +49,7 @@ public class LogsTest : IDisposable
             var file = new FileManager(_dir, 400);
             var log = new LogManager(file, Guid.NewGuid().ToString());
             CreateRecords(log, file, 1, 35);
-            Assert.Equal(20, log.GetInternalLastSavedLsNumber);
+            Assert.Equal(26, log.GetInternalLastSavedLsNumber);
 
             CreateRecords(log, file, 36, 70);
             log.Flush(65);
