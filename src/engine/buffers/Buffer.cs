@@ -37,6 +37,7 @@ public class Buffer : IBuffer
 
     public void AssignToBlock(IBlockId block)
     {
+        Flush();
         _block = block;
         _file.Read(_block, _page);
         _pins = 0;

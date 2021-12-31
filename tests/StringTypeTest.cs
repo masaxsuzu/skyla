@@ -17,6 +17,7 @@ public class StringTypeTest
     [InlineData(4, "a")]
     [InlineData(4, "あ")]
     [InlineData(12, "𩸽は魚だよ")]
+    [InlineData(34, "1234567890123456")]
     public void LengthTest(int len, string value)
     {
         var t = new StringType();

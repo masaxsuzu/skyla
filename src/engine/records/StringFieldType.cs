@@ -7,6 +7,7 @@ public class StringFieldType : IFieldType
     public StringFieldType(string name, int strLength)
     {
         Name = name;
+        Type = 22;
         // Due to own (generic) design choice,
         // any actual (string) value is required to compute length.
         var dummyString = Enumerable.Range(0, strLength)
@@ -16,6 +17,7 @@ public class StringFieldType : IFieldType
         ByteSize = new StringType().Length(dummyString);
     }
     public string Name { get; }
+    public int Type { get; }
 
     public int ByteSize { get; }
 
