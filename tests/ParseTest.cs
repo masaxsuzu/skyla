@@ -147,7 +147,7 @@ public class ParseTest
     {
         string src = "insert into a (x,y,z) values (1, 'a', 'b')";
 
-        var expected = new InsertCommand(
+        var expected = new InsertStatement(
             "a",
             new string[] { "x", "y", "z" },
             new IConstant[] {
@@ -184,7 +184,7 @@ public class ParseTest
             ),
         });
 
-        var expected = new DeleteCommand(
+        var expected = new DeleteStatement(
             "a",
             p
         );
@@ -207,7 +207,7 @@ public class ParseTest
             ),
         });
 
-        var expected = new ModifyCommand(
+        var expected = new ModifyStatement(
             "a",
             "x",
             new ConstantExpression(new IntegerConstant(1)),
@@ -220,6 +220,22 @@ public class ParseTest
         Assert.Equal(expected.ColumnName, got.ColumnName);
         Assert.Equal(expected.Expression, got.Expression);
         Assert.Equal(expected.Predicate, got.Predicate);
+    }
+    [Theory]
+    [InlineData(StatementType.table, "create table a (x int, y varchar(2), z varchar(10))")]
+    [InlineData(StatementType.view, "create view v1 as select x,y,z from a,b where x = 1 and y = 'y' and z = w")]
+    [InlineData(StatementType.index, "create index i1 on a (x)")]
+    [InlineData(StatementType.query, "select x from y where a = 1")]
+    [InlineData(StatementType.insert, "insert into a (x,y,z) values (1, 'a', 'b')")]
+    [InlineData(StatementType.update, "update a set x = 1 where y = 'y'")]
+    [InlineData(StatementType.delete, "delete from a where x = 1 and y = 'y'")]
+    public void ParseTest1(StatementType type, string src)
+    {
+        var parser = new Parser();
+        var (got, s) = parser.Parse(src);
+
+        Assert.Equal(type, got);
+        Assert.NotNull(s);
     }
 }
 

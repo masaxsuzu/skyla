@@ -4,6 +4,19 @@ namespace Skyla.Engine.Language;
 
 public class Parser
 {
+    public (StatementType, IStatement) Parse(string sql)
+    {
+        var lexer = new Lexer(sql);
+        var tokens = new TokenList(lexer.Tokenize(), 0);
+
+        var s = Statement(tokens, out TokenList rest);
+
+        if (!rest.IsEndOfStream())
+        {
+            throw new Exceptions.EngineException($"{rest.Peek(0).Literal} is not end of sql");
+        }
+        return s;
+    }
     public Predicate ParsePredicate(string sql)
     {
         var lexer = new Lexer(sql);
@@ -32,7 +45,7 @@ public class Parser
         return q;
     }
 
-    public InsertCommand ParseInsert(string sql)
+    public InsertStatement ParseInsert(string sql)
     {
         var lexer = new Lexer(sql);
         var tokens = new TokenList(lexer.Tokenize(), 0);
@@ -46,7 +59,7 @@ public class Parser
         return i;
     }
 
-    public DeleteCommand ParseDelete(string sql)
+    public DeleteStatement ParseDelete(string sql)
     {
         var lexer = new Lexer(sql);
         var tokens = new TokenList(lexer.Tokenize(), 0);
@@ -60,7 +73,7 @@ public class Parser
         return d;
     }
 
-    public ModifyCommand ParseModify(string sql)
+    public ModifyStatement ParseModify(string sql)
     {
         var lexer = new Lexer(sql);
         var tokens = new TokenList(lexer.Tokenize(), 0);
@@ -114,6 +127,46 @@ public class Parser
             throw new Exceptions.EngineException($"{rest.Peek(0).Literal} is not enf of sql");
         }
         return i;
+    }
+
+    private (StatementType, IStatement) Statement(TokenList token, out TokenList rest)
+    {
+        var tok1 = token.Peek(0);
+        var tok2 = token.Peek(1);
+        if (tok1.IsReserved("select"))
+        {
+            return (StatementType.query, Query(token, out rest));
+        }
+        if (tok1.IsReserved("create"))
+        {
+            if (tok2.IsReserved("table"))
+            {
+                return (StatementType.table, CreateTable(token, out rest));
+            }
+            if (tok2.IsReserved("view"))
+            {
+                return (StatementType.view, CreateView(token, out rest));
+            }
+            if (tok2.IsReserved("index"))
+            {
+                return (StatementType.index, CreateIndex(token, out rest));
+            }
+            throw new Engine.Exceptions.EngineException($"{tok2.Literal} is an undefined keyword");
+        }
+        if (tok1.IsReserved("insert"))
+        {
+            return (StatementType.insert, Insert(token, out rest));
+        }
+        if (tok1.IsReserved("update"))
+        {
+            return (StatementType.update, Modify(token, out rest));
+        }
+        if (tok1.IsReserved("delete"))
+        {
+            return (StatementType.delete, Delete(token, out rest));
+        }
+
+        throw new Engine.Exceptions.EngineException($"{tok1.Literal} is an undefined keyword");
     }
 
     private CreateTableStatement CreateTable(TokenList token, out TokenList rest)
@@ -188,7 +241,7 @@ public class Parser
         return new CreateIndexStatement(indexName, tableName, fieldName);
     }
 
-    private InsertCommand Insert(TokenList token, out TokenList rest)
+    private InsertStatement Insert(TokenList token, out TokenList rest)
     {
         token = token.Expect("insert");
         token = token.Expect("into");
@@ -205,10 +258,10 @@ public class Parser
         token = token.Expect(")");
 
         rest = token;
-        return new InsertCommand(tableName, ids, values);
+        return new InsertStatement(tableName, ids, values);
     }
 
-    private DeleteCommand Delete(TokenList token, out TokenList rest)
+    private DeleteStatement Delete(TokenList token, out TokenList rest)
     {
         token = token.Expect("delete");
         token = token.Expect("from");
@@ -219,16 +272,16 @@ public class Parser
             token = token.Consume(1);
             var p = Predicate(token, out token);
             rest = token;
-            return new DeleteCommand(tableName, p);
+            return new DeleteStatement(tableName, p);
         }
         else
         {
             rest = token;
-            return new DeleteCommand(tableName, null);
+            return new DeleteStatement(tableName, null);
         }
     }
 
-    private ModifyCommand Modify(TokenList token, out TokenList rest)
+    private ModifyStatement Modify(TokenList token, out TokenList rest)
     {
         token = token.Expect("update");
 
@@ -247,12 +300,12 @@ public class Parser
             token = token.Consume(1);
             var p = Predicate(token, out token);
             rest = token;
-            return new ModifyCommand(tableName, field, expr, p);
+            return new ModifyStatement(tableName, field, expr, p);
         }
         else
         {
             rest = token;
-            return new ModifyCommand(tableName, field, expr, null);
+            return new ModifyStatement(tableName, field, expr, null);
         }
     }
     private IConstant[] ConstantList(TokenList token, out TokenList rest)
