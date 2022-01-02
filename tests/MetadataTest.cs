@@ -9,53 +9,23 @@ using Skyla.Engine.Interfaces;
 using Skyla.Engine.Logs;
 using Skyla.Engine.Metadata;
 using Skyla.Engine.Records;
-using Skyla.Engine.Transactions;
+using Skyla.Engine.Scans;
 using Xunit;
 namespace Skyla.Tests;
 
-public class MetadataTest : IDisposable
+public class MetadataTest
 {
-    private DirectoryInfo _dir;
-    public MetadataTest()
+    private Skyla.Engine.Database.Server _server;
+    public MetadataTest(Skyla.Engine.Database.Server server)
     {
-#pragma warning disable CS8602
-#pragma warning disable CS8604
-        var entryPath = Assembly.GetEntryAssembly()?.Location;
-        var parent = new DirectoryInfo(entryPath).Parent;
-        var testPath = Path.Combine(parent.FullName, "MetadataTest");
-        _dir = new DirectoryInfo(testPath);
-        if (!_dir.Exists)
-        {
-            _dir.Create();
-        }
-        foreach (var file in _dir.GetFiles())
-        {
-            file.Delete();
-        }
-    }
-
-    public void Dispose()
-    {
-        foreach (var file in _dir.GetFiles())
-        {
-            file.Delete();
-        }
+        _server = server;
     }
 
     [Fact]
     public void MetadataManagerTest()
     {
-        var file = new FileManager(_dir, 400);
-        var log = new LogManager(file, Guid.NewGuid().ToString());
-        var buffer = new BufferManager(file, log, 8);
-        var transaction = new Transaction(file, log, buffer);
-
-        var tables = new TableMetadataManager(true, transaction);
-        var views = new ViewMetadataManager(true, tables, transaction);
-        var stats = new StatisticsMetadataManager(tables, transaction);
-        var indexes = new IndexMetadataManager(true, tables, stats, transaction);
-
-        var metadata = new MetadataManager(tables, views, stats, indexes);
+        var transaction = _server.Create();
+        var metadata = _server.Metadata;
         transaction.Commit();
         // 1. Tables
         {
@@ -64,12 +34,7 @@ public class MetadataTest : IDisposable
             var layout2 = metadata.GetLayout("field_catalog", transaction);
             Assert.Equal(4 + 34 * 2 + 4 * 3, layout2.SlotSize);
 
-            var schema = new Schema();
-            schema.AddField(new IntegerFieldType("a"));
-            schema.AddField(new StringFieldType("b", 2));
-
-            metadata.CreateTable("t1", schema, transaction);
-            var layout3 = metadata.GetLayout("t1", transaction);
+            var layout3 = metadata.GetLayout("metadatatest1", transaction);
             Assert.Equal(4 + 4 + 6, layout3.SlotSize);
 
             var typeA = layout3.Schema.GetType("a");
@@ -81,17 +46,16 @@ public class MetadataTest : IDisposable
 
         // 2. Views
         {
-            var viewDef = "SELECT a FROM t1 WHERE a = 1;";
-            metadata.CreateView("v1", viewDef, transaction);
-            var got = metadata.GetViewDefinition("v1", transaction);
+            var viewDef = "select a from metadatatest1 where a = 1";
+            var got = metadata.GetViewDefinition("metadatatest2", transaction);
 
             Assert.Equal(viewDef, got);
         }
 
         // 3. Statistics
         {
-            var layout = metadata.GetLayout("t1", transaction);
-            var tableScan = new TableScan(transaction, "t1", layout);
+            var layout = metadata.GetLayout("metadatatest1", transaction);
+            var tableScan = new TableScan(transaction, "metadatatest1", layout);
             for (int i = 0; i < 300; i++)
             {
                 tableScan.Insert();
@@ -100,12 +64,14 @@ public class MetadataTest : IDisposable
             }
             tableScan.Close();
 
-            var stat = metadata.GetStatInfo("t1", layout, transaction);
+            var stat = metadata.GetStatInfo("metadatatest1", layout, transaction);
 
             Assert.Equal(300, stat.Records);
             Assert.Equal(22, stat.AccessedBlocks);
             Assert.Equal(101, stat.DistinctValues("a"));
             Assert.Equal(101, stat.DistinctValues("b"));
         }
+
+        transaction.Commit();
     }
 }

@@ -1,5 +1,5 @@
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Language.Ast;
+namespace Skyla.Engine.Scans;
 
 public class FieldExpression : IExpression
 {
@@ -10,6 +10,12 @@ public class FieldExpression : IExpression
     public IField Field { get; }
     public ExpressionType Type => ExpressionType.field;
 
+    public IConstant Evaluate(IScan s)
+    {
+        return s.Get(Field.Identifier);
+    }
+
+
     public bool Equals(IExpression? other)
     {
         if (other is FieldExpression f)
@@ -17,6 +23,11 @@ public class FieldExpression : IExpression
             return Field.Equals(f.Field);
         }
         return false;
+    }
+
+    public string Format()
+    {
+        return Field.Identifier;
     }
 }
 
@@ -27,6 +38,8 @@ public class ConstantExpression : IExpression
         Constant = constant;
     }
     public IConstant Constant { get; }
+
+    public IConstant Evaluate(IScan s) => Constant;
     public ExpressionType Type => ExpressionType.constant;
 
     public bool Equals(IExpression? other)
@@ -36,5 +49,10 @@ public class ConstantExpression : IExpression
             return Constant.Equals(c.Constant);
         }
         return false;
+    }
+
+    public string Format()
+    {
+        return Constant.Format();
     }
 }

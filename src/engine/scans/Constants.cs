@@ -1,5 +1,5 @@
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Language.Ast;
+namespace Skyla.Engine.Scans;
 
 public class IntegerConstant : IConstant
 {
@@ -16,6 +16,10 @@ public class IntegerConstant : IConstant
             return Value == i.Value;
         }
         return false;
+    }
+    public string Format()
+    {
+        return Value.ToString();
     }
 }
 
@@ -35,5 +39,9 @@ public class StringConstant : IConstant
             return Value == i.Value;
         }
         return false;
+    }
+    public string Format()
+    {
+        return $"\'{Value.ToString()}\'";
     }
 }

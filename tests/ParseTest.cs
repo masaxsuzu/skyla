@@ -1,6 +1,8 @@
 using Skyla.Engine.Interfaces;
 using Skyla.Engine.Language;
 using Skyla.Engine.Language.Ast;
+using Skyla.Engine.Scans;
+
 using Xunit;
 namespace Skyla.Tests;
 
@@ -61,7 +63,7 @@ public class ParseTest
     {
         string src = "select x from a";
 
-        var expected = new QueryStatement(new string[] { "x" }, new string[] { "a" }, null);
+        var expected = new QueryStatement(new string[] { "x" }, new string[] { "a" }, new Predicate());
         var parser = new Parser();
         var got = parser.ParseQuery(src);
         Assert.Equal(expected.ColumnNames, got.ColumnNames);
@@ -115,6 +117,7 @@ public class ParseTest
 
         var expected = new CreateViewStatement(
             "v1",
+            "select x,y,z from a,b where x = 1 and y = 'y' and z = w",
             new string[] { "x", "y", "z" },
             new string[] { "a", "b" },
             p
@@ -123,6 +126,7 @@ public class ParseTest
         var got = parser.ParseCreateView(src);
 
         Assert.Equal(expected.ViewName, got.ViewName);
+        Assert.Equal(expected.ViewDefinition, got.ViewDefinition);
         Assert.Equal(expected.ColumnNames, got.ColumnNames);
         Assert.Equal(expected.TableNames, got.TableNames);
         Assert.Equal(expected.Predicate, got.Predicate);

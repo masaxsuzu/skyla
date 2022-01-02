@@ -1,9 +1,12 @@
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Language.Ast;
+namespace Skyla.Engine.Scans;
 
 public class Predicate : IPredicate
 {
     private readonly List<ITerm> _term = new List<ITerm>();
+    public Predicate()
+    {
+    }
     public Predicate(ITerm[] terms)
     {
         _term.AddRange(terms);
@@ -15,6 +18,18 @@ public class Predicate : IPredicate
     {
         _term.AddRange(p.Terms);
         return this;
+    }
+
+    public bool IsSatisfied(IScan s)
+    {
+        foreach (var t in _term)
+        {
+            if (!t.IsSatisfied(s))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public bool Equals(IPredicate? other)
@@ -38,5 +53,12 @@ public class Predicate : IPredicate
         }
 
         return true;
+    }
+
+    public string Format()
+    {
+        var sb = new System.Text.StringBuilder("");
+        sb.AppendJoin(" and ", _term.Select(t => t.Format()));
+        return sb.ToString();
     }
 }

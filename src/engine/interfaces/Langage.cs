@@ -32,9 +32,10 @@ public record TypeDefinition(string Identifier, DefineType Type, int Length)
 public interface ICreateViewStatement : IStatement
 {
     string ViewName { get; }
+    string ViewDefinition { get; }
     string[] ColumnNames { get; }
     string[] TableNames { get; }
-    IPredicate? Predicate { get; }
+    IPredicate Predicate { get; }
 }
 
 public interface ICreateIndexStatement : IStatement
@@ -48,7 +49,7 @@ public interface IQueryStatement : IStatement
 {
     string[] ColumnNames { get; }
     string[] TableNames { get; }
-    IPredicate? Predicate { get; }
+    IPredicate Predicate { get; }
 }
 
 public interface IInsertStatement : IStatement
@@ -61,7 +62,7 @@ public interface IInsertStatement : IStatement
 public interface IDeleteStatement : IStatement
 {
     string TableName { get; }
-    IPredicate? Predicate { get; }
+    IPredicate Predicate { get; }
 }
 
 public interface IModifyStatement : IStatement
@@ -69,5 +70,5 @@ public interface IModifyStatement : IStatement
     string TableName { get; }
     string ColumnName { get; }
     IExpression Expression { get; }
-    IPredicate? Predicate { get; }
+    IPredicate Predicate { get; }
 }

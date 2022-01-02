@@ -1,13 +1,14 @@
 using Skyla.Engine.Interfaces;
 using Skyla.Engine.Language.Ast;
+using Skyla.Engine.Scans;
 namespace Skyla.Engine.Language;
 
-public class Parser
+public class Parser : IParser
 {
     public (StatementType, IStatement) Parse(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var s = Statement(tokens, out TokenList rest);
 
@@ -20,7 +21,7 @@ public class Parser
     public Predicate ParsePredicate(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var p = Predicate(tokens, out TokenList rest);
 
@@ -31,10 +32,10 @@ public class Parser
         return p;
     }
 
-    public QueryStatement ParseQuery(string sql)
+    public IQueryStatement ParseQuery(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var q = Query(tokens, out TokenList rest);
 
@@ -45,10 +46,10 @@ public class Parser
         return q;
     }
 
-    public InsertStatement ParseInsert(string sql)
+    public IInsertStatement ParseInsert(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var i = Insert(tokens, out TokenList rest);
 
@@ -59,10 +60,10 @@ public class Parser
         return i;
     }
 
-    public DeleteStatement ParseDelete(string sql)
+    public IDeleteStatement ParseDelete(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var d = Delete(tokens, out TokenList rest);
 
@@ -73,10 +74,10 @@ public class Parser
         return d;
     }
 
-    public ModifyStatement ParseModify(string sql)
+    public IModifyStatement ParseModify(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var m = Modify(tokens, out TokenList rest);
 
@@ -87,10 +88,10 @@ public class Parser
         return m;
     }
 
-    public CreateTableStatement ParseCreateTable(string sql)
+    public ICreateTableStatement ParseCreateTable(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var t = CreateTable(tokens, out TokenList rest);
 
@@ -101,10 +102,10 @@ public class Parser
         return t;
     }
 
-    public CreateViewStatement ParseCreateView(string sql)
+    public ICreateViewStatement ParseCreateView(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var t = CreateView(tokens, out TokenList rest);
 
@@ -115,10 +116,10 @@ public class Parser
         return t;
     }
 
-    public CreateIndexStatement ParseCreateIndex(string sql)
+    public ICreateIndexStatement ParseCreateIndex(string sql)
     {
         var lexer = new Lexer(sql);
-        var tokens = new TokenList(lexer.Tokenize(), 0);
+        var tokens = new TokenList(sql, lexer.Tokenize(), 0);
 
         var i = CreateIndex(tokens, out TokenList rest);
 
@@ -223,7 +224,7 @@ public class Parser
 
         rest = token;
 
-        return new CreateViewStatement(viewName, q.ColumnNames, q.TableNames, q.Predicate);
+        return new CreateViewStatement(viewName, Format(q.ColumnNames, q.TableNames, q.Predicate), q.ColumnNames, q.TableNames, q.Predicate);
     }
     private CreateIndexStatement CreateIndex(TokenList token, out TokenList rest)
     {
@@ -277,7 +278,7 @@ public class Parser
         else
         {
             rest = token;
-            return new DeleteStatement(tableName, null);
+            return new DeleteStatement(tableName, new Predicate());
         }
     }
 
@@ -305,7 +306,7 @@ public class Parser
         else
         {
             rest = token;
-            return new ModifyStatement(tableName, field, expr, null);
+            return new ModifyStatement(tableName, field, expr, new Predicate());
         }
     }
     private IConstant[] ConstantList(TokenList token, out TokenList rest)
@@ -340,7 +341,7 @@ public class Parser
         else
         {
             rest = token;
-            return new QueryStatement(selects, tables, null);
+            return new QueryStatement(selects, tables, new Predicate());
         }
     }
 
@@ -414,5 +415,25 @@ public class Parser
             return new StringConstant(c.Literal);
         }
         throw new Engine.Exceptions.EngineException($"{c.Literal} is not constant");
+    }
+
+    private string Format(string[] columnNames, string[] tableNames, IPredicate predicate)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("select ");
+        sb.Append(string.Join(',', columnNames));
+        sb.Append(" ");
+        sb.Append("from ");
+        sb.Append(string.Join(',', tableNames));
+        if (predicate.Terms.Length == 0)
+        {
+            return sb.ToString();
+        }
+        else
+        {
+            sb.Append(" where ");
+            sb.Append(predicate.Format());
+            return sb.ToString();
+        }
     }
 }

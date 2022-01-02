@@ -1,5 +1,5 @@
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Language.Ast;
+namespace Skyla.Engine.Scans;
 
 public class Field : IField
 {

@@ -1,8 +1,9 @@
 using Skyla.Engine.Format;
 using Skyla.Engine.Interfaces;
-namespace Skyla.Engine.Records;
+using Skyla.Engine.Records;
+namespace Skyla.Engine.Scans;
 
-public class TableScan : ITableScan
+public class TableScan : IUpdateScan
 {
     private readonly ITransaction _transaction;
     private readonly ILayout _layout;
@@ -63,9 +64,38 @@ public class TableScan : ITableScan
         return _recordPage.GetInt(_currentSlot, fieldName);
     }
 
+    public IConstant Get(string fieldName)
+    {
+        var type = _layout.Schema.GetType(fieldName).Type;
+        if (type == 8)
+        {
+            var i = _recordPage.GetInt(_currentSlot, fieldName);
+            return new IntegerConstant(i);
+        }
+        var s = _recordPage.GetString(_currentSlot, fieldName);
+        return new StringConstant(s);
+    }
+
     public string GetString(string fieldName)
     {
         return _recordPage.GetString(_currentSlot, fieldName);
+    }
+
+    public void Set(string fieldName, IConstant value)
+    {
+        var type = value.Type;
+        if (type == ConstantType.integer)
+        {
+#pragma warning disable CS8602
+            var i = value as IntegerConstant;
+            SetInt(fieldName, i.Value);
+        }
+        else if (type == ConstantType.varchar)
+        {
+#pragma warning disable CS8602
+            var s = value as StringConstant;
+            SetString(fieldName, s.Value);
+        }
     }
 
     public void SetInt(string fieldName, int value)

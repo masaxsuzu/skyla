@@ -4,15 +4,17 @@ public class TokenList
 {
     private readonly Token[] _tokens;
     private readonly int _at;
-    public TokenList(Token[] tokens, int at)
+    private readonly string _src;
+    public TokenList(string src, Token[] tokens, int at)
     {
         _tokens = tokens;
         _at = at;
+        _src = src;
     }
 
     public TokenList Consume(int next)
     {
-        return new TokenList(_tokens, _at + next);
+        return new TokenList(_src, _tokens, _at + next);
     }
 
     public void Must(TokenType type)
@@ -47,4 +49,6 @@ public class TokenList
     {
         return Peek(0).IsReserved("");
     }
+
+    public string Source => _src;
 }

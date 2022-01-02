@@ -8,6 +8,7 @@ using Skyla.Engine.Format;
 using Skyla.Engine.Interfaces;
 using Skyla.Engine.Logs;
 using Skyla.Engine.Records;
+using Skyla.Engine.Scans;
 using Skyla.Engine.Transactions;
 using Xunit;
 namespace Skyla.Tests;

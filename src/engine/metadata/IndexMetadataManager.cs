@@ -1,5 +1,6 @@
 using Skyla.Engine.Interfaces;
 using Skyla.Engine.Records;
+using Skyla.Engine.Scans;
 namespace Skyla.Engine.Metadata;
 
 public class IndexMetadataManager
