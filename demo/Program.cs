@@ -7,6 +7,8 @@ using Skyla.Engine.Plans;
 using Skyla.Engine.Drivers;
 using Skyla.Engine.Interfaces;
 
+Console.WriteLine("initializing...");
+
 #pragma warning disable CS8602
 #pragma warning disable CS8604
 var entryPath = Assembly.GetEntryAssembly()?.Location;
@@ -17,10 +19,10 @@ if(dir.Parent.Exists){
     dir.Parent.Delete(true);
 }
 
-var s = new Server(dir, 400, 8);
+var s = new Server(dir, 4096, 256);
 var tx = s.Create();
 var driver = new NaiveDriver(s, tx);
-Console.WriteLine("Hello, Skyla!");
+
 
 #pragma warning disable CS8622
 Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs args) {
@@ -36,12 +38,12 @@ var samples = new string[]{
     "create view v3 as select x,y,z from a where z = '3'",
     "insert into a (x,y,z) values (0, '0', '0')",
     "insert into a (x,y,z) values (0, '0', '3')",
-    "insert into a (x,y,z) values (0, 'あ', '0')",
+    "insert into a (x,y,z) values (0, '2', '0')",
     "insert into a (x,y,z) values (0, '2', '3')",
     "insert into a (x,y,z) values (1, '0', '0')",
     "insert into a (x,y,z) values (1, '0', '3')",
     "insert into a (x,y,z) values (1, '2', '0')",
-    "insert into a (x,y,z) values (1, '2', '日本語')",
+    "insert into a (x,y,z) values (1, '2', '3')",
     "select x,y,z from a",
     "select x,y,z from a where x = 1 and y = '2'",
     "select x,y,z from v1",
@@ -52,6 +54,11 @@ var samples = new string[]{
 foreach (var sample in samples)
 {
     var ret = driver.Drive(sample);
+}
+
+foreach (var i in Enumerable.Range(0, 1000))
+{
+    var ret = driver.Drive($"insert into a (x,y,z) values ({i % 10}, '0', '{i.ToString()}')");
 }
 
 while (true)
