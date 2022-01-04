@@ -25,7 +25,6 @@ public class NaiveUpdatePlanner : ISchemaPlanner, ICommandPlanner
 
     public int CreateView(ICreateViewStatement statement, ITransaction transaction)
     {
-        // todo;
         _metadata.CreateView(statement.ViewName, statement.ViewDefinition, transaction);
         return 0;
     }

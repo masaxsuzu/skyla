@@ -24,10 +24,21 @@ public class SelectPlan : IWritablePlan
 
     public ISchema Schema => _planR.Schema;
 
-    public int DistinctValues(string fieldName)
+    public int DistinctValues(string fieldName1)
     {
-        //TODO
-        return _planR.DistinctValues(fieldName);
+        if (_predicate.EquatesWitConstant(fieldName1) != null)
+        {
+            return 1;
+        }
+        var fieldName2 = _predicate.EquatesWithField(fieldName1);
+        if (fieldName2 != null)
+        {
+            return Math.Min(_planR.DistinctValues(fieldName1), _planR.DistinctValues(fieldName2));
+        }
+        else
+        {
+            return _planR.DistinctValues(fieldName1);
+        }
     }
 
     public IScan Open()

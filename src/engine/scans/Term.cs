@@ -31,4 +31,65 @@ public class Term : ITerm
     {
         return $"{Left.Format()} = {Right.Format()}";
     }
+
+    public bool AppliedTo(ISchema schema)
+    {
+        return Left.AppliesTo(schema) && Right.AppliesTo(schema);
+    }
+#pragma warning disable CS8604
+
+    public int ReductionFactor(IPlan p)
+    {
+        var leftName = Left.AsFieldName;
+        var rightName = Right.AsFieldName;
+
+        if (Left.Type == ExpressionType.field && Right.Type == ExpressionType.field)
+        {
+            return Math.Max(p.DistinctValues(leftName), p.DistinctValues(rightName));
+        }
+
+        if (Left.Type == ExpressionType.field)
+        {
+            return p.DistinctValues(leftName);
+        }
+        if (Right.Type == ExpressionType.field)
+        {
+            return p.DistinctValues(rightName);
+        }
+        if (Left.Equals(Right))
+        {
+            return 1;
+        }
+        else
+        {
+            return Int32.MaxValue;
+        }
+
+    }
+
+    public IConstant? EquatesWitConstant(string name)
+    {
+        if (Left.Type == ExpressionType.field && Left.AsFieldName == name && Right.Type != ExpressionType.field)
+        {
+            return Right.AsConstant;
+        }
+        if (Right.Type == ExpressionType.field && Right.AsFieldName == name && Left.Type != ExpressionType.field)
+        {
+            return Left.AsConstant;
+        }
+        return null;
+    }
+
+    public string? EquatesWithField(string name)
+    {
+        if (Left.Type == ExpressionType.field && Left.AsFieldName == name && Right.Type == ExpressionType.field)
+        {
+            return Right.AsFieldName;
+        }
+        if (Right.Type == ExpressionType.field && Right.AsFieldName == name && Left.Type == ExpressionType.field)
+        {
+            return Left.AsFieldName;
+        }
+        return null;
+    }
 }

@@ -10,6 +10,10 @@ public class FieldExpression : IExpression
     public IField Field { get; }
     public ExpressionType Type => ExpressionType.field;
 
+    public string AsFieldName => Field.Identifier;
+
+    public IConstant? AsConstant => null;
+
     public IConstant Evaluate(IScan s)
     {
         return s.Get(Field.Identifier);
@@ -29,6 +33,11 @@ public class FieldExpression : IExpression
     {
         return Field.Identifier;
     }
+
+    public bool AppliesTo(ISchema schema)
+    {
+        return schema.Has(Field.Identifier);
+    }
 }
 
 public class ConstantExpression : IExpression
@@ -42,6 +51,10 @@ public class ConstantExpression : IExpression
     public IConstant Evaluate(IScan s) => Constant;
     public ExpressionType Type => ExpressionType.constant;
 
+    public string AsFieldName => "";
+
+    public IConstant? AsConstant => Constant;
+
     public bool Equals(IExpression? other)
     {
         if (other is ConstantExpression c)
@@ -54,5 +67,10 @@ public class ConstantExpression : IExpression
     public string Format()
     {
         return Constant.Format();
+    }
+
+    public bool AppliesTo(ISchema schema)
+    {
+        return true;
     }
 }

@@ -52,10 +52,10 @@ public class NaiveDriver
                     var q4 = statement as IQueryStatement;
                     var p4 = _queryPlanner.Create(q4, _tx);
                     var s4 = p4.Open();
-                    var r4 =  System.Text.Json.Nodes.JsonNode.Parse("[]").AsArray();
+                    var r4 = System.Text.Json.Nodes.JsonNode.Parse("[]").AsArray();
                     while (s4.Next())
                     {
-                        var d =  System.Text.Json.Nodes.JsonNode.Parse("{}").AsObject();
+                        var d = System.Text.Json.Nodes.JsonNode.Parse("{}").AsObject();
                         foreach (var columnName in q4.ColumnNames)
                         {
                             var v = s4.Get(columnName);
