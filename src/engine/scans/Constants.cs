@@ -1,6 +1,7 @@
 using Skyla.Engine.Interfaces;
 namespace Skyla.Engine.Scans;
 
+#pragma warning disable CS8602
 public class IntegerConstant : IConstant
 {
     public IntegerConstant(int value)
@@ -9,6 +10,14 @@ public class IntegerConstant : IConstant
     }
     public int Value { get; }
     public ConstantType Type => ConstantType.integer;
+
+    public int CompareTo(IConstant? other)
+    {
+        if (other == null) return -1;
+        if (Type != other.Type) return Type - other.Type;
+        return Value.CompareTo((other as IntegerConstant).Value);
+    }
+
     public bool Equals(IConstant? other)
     {
         if (other is IntegerConstant i)
@@ -43,5 +52,11 @@ public class StringConstant : IConstant
     public string Format()
     {
         return $"\'{Value.ToString()}\'";
+    }
+    public int CompareTo(IConstant? other)
+    {
+        if (other == null) return -1;
+        if (Type != other.Type) return Type - other.Type;
+        return Value.CompareTo((other as StringConstant).Value);
     }
 }
