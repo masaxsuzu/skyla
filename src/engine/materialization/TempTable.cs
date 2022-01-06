@@ -17,14 +17,15 @@ public class TempTable
         _tableName = NextTableNumber();
         _layout = new Layout(schema);
     }
-    public IUpdateScan Update() {
+    public IUpdateScan Update()
+    {
         return new TableScan(_transaction, _tableName, _layout);
     }
     public string TableName => _tableName;
     public ILayout Layout => _layout;
     private static string NextTableNumber()
     {
-        lock(_lock)
+        lock (_lock)
         {
             _nextTableNumber++;
             return $"temp{_nextTableNumber}";

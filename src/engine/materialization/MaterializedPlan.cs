@@ -8,17 +8,19 @@ public class MaterializedPlan : IPlan
 {
     private ITransaction _transaction;
     private IPlan _plan;
-    
+
     public MaterializedPlan(ITransaction transaction, IPlan plan)
     {
         _transaction = transaction;
         _plan = plan;
     }
-    public int AccessedBlocks {
-        get{
+    public int AccessedBlocks
+    {
+        get
+        {
             var layout = new Layout(_plan.Schema);
-            var rpb = (double) (_transaction.BlockSize / layout.SlotSize);
-            return (int) Math.Ceiling(_plan.Records / rpb);
+            var rpb = (double)(_transaction.BlockSize / layout.SlotSize);
+            return (int)Math.Ceiling(_plan.Records / rpb);
         }
     }
 
@@ -39,11 +41,11 @@ public class MaterializedPlan : IPlan
         var dest = temp.Update();
         while (src.Next())
         {
-             dest.Insert();
-             foreach (var field in schema.Fields)
-             {
-                 dest.Set(field.Name, src.Get(field.Name));
-             }
+            dest.Insert();
+            foreach (var field in schema.Fields)
+            {
+                dest.Set(field.Name, src.Get(field.Name));
+            }
         }
         src.Close();
         dest.BeforeFirst();
