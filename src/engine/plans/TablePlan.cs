@@ -36,6 +36,10 @@ public class TablePlan : IWritablePlan
 
     public IUpdateScan Update()
     {
+        return ScanTable();
+    }
+    public TableScan ScanTable()
+    {
         return new TableScan(_transaction, _tableName, _layout);
     }
 }
