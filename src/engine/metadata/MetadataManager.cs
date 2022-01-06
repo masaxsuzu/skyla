@@ -38,7 +38,7 @@ public class MetadataManager : IMetadataManager
         _indexes.CreateIndex(indexName, tableName, fieldName, transaction);
     }
 
-    public Dictionary<string, IIndexInfo> GetIndexInfo(string tableName, string fieldName, ITransaction transaction)
+    public Dictionary<string, IIndexInfo> GetIndexInfo(string tableName, ITransaction transaction)
     {
         return _indexes.GetIndexInto(tableName, transaction);
     }
