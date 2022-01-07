@@ -52,31 +52,23 @@ public class NaiveDriver
                     var q4 = statement as IQueryStatement;
                     var p4 = _queryPlanner.Create(q4, _tx);
                     var s4 = p4.Open();
-                    var r4 = System.Text.Json.Nodes.JsonNode.Parse("[]").AsArray();
+                    var sb = new System.Text.StringBuilder();
+                    sb.AppendLine(string.Join("\t", q4.ColumnNames));
+                    sb.AppendLine(string.Join("\t", q4.ColumnNames.Select(s => "----")));
+                    var r4 = 0;
                     while (s4.Next())
                     {
-                        var d = System.Text.Json.Nodes.JsonNode.Parse("{}").AsObject();
+                        var line = new List<string>();
                         foreach (var columnName in q4.ColumnNames)
                         {
                             var v = s4.Get(columnName);
-                            switch (v.Type)
-                            {
-                                case ConstantType.integer:
-                                    var vi = v as IntegerConstant;
-                                    d.Add(columnName, System.Text.Json.Nodes.JsonValue.Create(vi.Value));
-                                    break;
-                                case ConstantType.varchar:
-                                    var vs = v as StringConstant;
-                                    d.Add(columnName, System.Text.Json.Nodes.JsonValue.Create(vs.Value));
-                                    break;
-                                default:
-                                    return new ExecutionResult(-1, $"value type {v.Type} is not supported");
-                            }
+                            line.Add(v.Format());
                         }
-                        r4.Add(d);
+                        r4++;
+                        sb.AppendLine(string.Join("\t", line));
                     }
                     s4.Close();
-                    return new ExecutionResult(r4.Count, System.Text.Json.JsonSerializer.Serialize(r4));
+                    return new ExecutionResult(r4, sb.ToString());
                 case Skyla.Engine.Interfaces.StatementType.insert:
                     var c5 = statement as IInsertStatement;
                     var r5 = _commandPlanner.Insert(c5, _tx);

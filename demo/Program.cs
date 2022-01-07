@@ -58,7 +58,7 @@ foreach (var sample in samples)
 
 foreach (var i in Enumerable.Range(0, 1000))
 {
-    var ret = driver.Drive($"insert into a (x,y,z) values ({i % 10}, '0', '{i.ToString()}')");
+    var ret = driver.Drive($"insert into a (x,y,z) values ({i}, '{(i % 10).ToString()}', '{(i % 100).ToString()}')");
 }
 
 while (true)
