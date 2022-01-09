@@ -5,6 +5,7 @@ using Skyla.Engine.Database;
 using Skyla.Engine.Language;
 using Skyla.Engine.Plans;
 using Skyla.Engine.Drivers;
+using Skyla.Engine.Scans;
 using Skyla.Engine.Interfaces;
 
 Console.WriteLine("initializing...");
@@ -45,19 +46,15 @@ Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs args) 
     System.Environment.Exit(-1);
 };
 
-var samples = new string[]{
+var samples1 = new string[]{
     "create table a (x int, y varchar(2), z varchar(10))",
     "create view v1 as select x,y,z from a where x = 1",
     "create view v2 as select x,y,z from a where y = '2'",
     "create view v3 as select x,y,z from a where z = '3'",
-    "insert into a (x,y,z) values (0, '0', '0')",
-    "insert into a (x,y,z) values (0, '0', '3')",
-    "insert into a (x,y,z) values (0, '2', '0')",
-    "insert into a (x,y,z) values (0, '2', '3')",
-    "insert into a (x,y,z) values (1, '0', '0')",
-    "insert into a (x,y,z) values (1, '0', '3')",
-    "insert into a (x,y,z) values (1, '2', '0')",
-    "insert into a (x,y,z) values (1, '2', '3')",
+    "create index i1 on a (x)",
+};
+
+var samples2 = new string[]{
     "select x,y,z from a",
     "select x,y,z from a where x = 1 and y = '2'",
     "select x,y,z from v1",
@@ -65,14 +62,26 @@ var samples = new string[]{
     "select x,y,z from v3",
 };
 
-foreach (var sample in samples)
+foreach (var sample in samples1)
 {
     var ret = driver.Drive(sample);
 }
 
-foreach (var i in System.Linq.Enumerable.Range(0, 10000))
+var table = new TableScan(tx, "a", s.Metadata.GetLayout("a", tx));
+table.BeforeFirst();
+foreach (var i in System.Linq.Enumerable.Range(0, 100000))
 {
-    var ret = driver.Drive($"insert into a (x,y,z) values ({i}, '{(i % 10).ToString()}', '{(i % 100).ToString()}')");
+    table.Insert();
+    table.SetInt("x", i);
+    table.SetString("y", (i % 10).ToString());
+    table.SetString("z", (i % 100).ToString());
+};
+table.Close();
+
+
+foreach (var sample in samples2)
+{
+    var ret = driver.Drive(sample);
 }
 
 while (true)
