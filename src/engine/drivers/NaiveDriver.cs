@@ -18,14 +18,14 @@ public class NaiveDriver
     private readonly ICommandPlanner _commandPlanner;
     private readonly ISchemaPlanner _schemaPlanner;
     private readonly ITransaction _tx;
-    public NaiveDriver(Server server, ITransaction tx)
+    public NaiveDriver(Server server, ITransaction tx, IQueryPlanner q, ICommandPlanner c, ISchemaPlanner s)
     {
         _tx = tx;
         _server = server;
         _parser = new Parser();
-        _queryPlanner = new NaiveQueryPlanner(_parser, _server.Metadata);
-        _commandPlanner = new NaiveUpdatePlanner(_server.Metadata);
-        _schemaPlanner = new NaiveUpdatePlanner(_server.Metadata);
+        _queryPlanner = q;
+        _commandPlanner = c;
+        _schemaPlanner = s;
     }
 #pragma warning disable CS8602
 #pragma warning disable CS8604

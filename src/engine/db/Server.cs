@@ -53,4 +53,6 @@ public class Server
     public ITransaction Create() => new Transaction(_file, _log, _buffer);
 
     public IMetadataManager Metadata => _metadata;
+
+    public DirectoryInfo Directory => _dir;
 }

@@ -17,16 +17,16 @@ using Skyla.Engine.Transactions;
 using Xunit;
 namespace Skyla.Tests;
 
-public class PlannersTest
+public class OptimizedPlannerTest
 {
     private Skyla.Engine.Database.Server _server;
-    public PlannersTest(ServerResolver r)
+    public OptimizedPlannerTest(ServerResolver r)
     {
-        _server = r.Resolve("test_db1");
+        _server = r.Resolve("test_db2");
     }
 
     [Fact]
-    public async Task NaivePlannerTest1()
+    public async Task IndexedPlannerTest1()
     {
         var transaction1 = _server.Create();
         var metadata = _server.Metadata;
@@ -54,7 +54,7 @@ public class PlannersTest
             var sql1 = "select a from plannerstest1";
             var q = p.ParseQuery(sql1);
 
-            var planner = new NaiveQueryPlanner(p, metadata);
+            var planner = new HeuristicQueryPlanner(metadata);
             var plan = planner.Create(q, transaction2);
 
             var s = plan.Open();
@@ -69,10 +69,10 @@ public class PlannersTest
             transaction2.Commit();
         }
         {
-            var sql2 = "select a from plannerstest2";
+            var sql2 = "select a from plannerstest1 where a = 2";
             var q2 = p.ParseQuery(sql2);
 
-            var planner2 = new NaiveQueryPlanner(p, metadata);
+            var planner2 = new HeuristicQueryPlanner(metadata);
             var plan2 = planner2.Create(q2, transaction2);
 
             var s2 = plan2.Open();
@@ -87,7 +87,7 @@ public class PlannersTest
     }
 
     [Fact]
-    public async Task NaivePlannerTest2()
+    public async Task IndexedPlannerTest2()
     {
         await Task.Delay(0);
 
@@ -101,7 +101,7 @@ public class PlannersTest
             var sql1 = "insert into plannerstest3 (y) values ('123')";
             var q = p.ParseInsert(sql1);
 
-            var planner = new NaiveUpdatePlanner(metadata);
+            var planner = new IndexedUpdatePlanner(metadata);
             int c = planner.Insert(q, transaction);
 
             Assert.Equal(1, c);
@@ -111,7 +111,7 @@ public class PlannersTest
             var sql2 = "select y from plannerstest3";
             var q2 = p.ParseQuery(sql2);
 
-            var planner2 = new NaiveQueryPlanner(p, metadata);
+            var planner2 = new HeuristicQueryPlanner(metadata);
             var plan2 = planner2.Create(q2, transaction);
 
             var s2 = plan2.Open();
@@ -127,7 +127,7 @@ public class PlannersTest
             var sql3 = "update plannerstest3 set x = 1 where y = '123'";
             var q3 = p.ParseModify(sql3);
 
-            var planner3 = new NaiveUpdatePlanner(metadata);
+            var planner3 = new IndexedUpdatePlanner(metadata);
             var c = planner3.Modify(q3, transaction);
             Assert.Equal(1, c);
             transaction.Commit();
@@ -136,7 +136,7 @@ public class PlannersTest
             var sql4 = "delete from plannerstest3 where x = 1";
             var q4 = p.ParseDelete(sql4);
 
-            var planner4 = new NaiveUpdatePlanner(metadata);
+            var planner4 = new IndexedUpdatePlanner(metadata);
             var c = planner4.Delete(q4, transaction);
             Assert.Equal(1, c);
             transaction.Commit();
@@ -145,7 +145,7 @@ public class PlannersTest
             var sql5 = "delete from plannerstest3";
             var q5 = p.ParseDelete(sql5);
 
-            var planner5 = new NaiveUpdatePlanner(metadata);
+            var planner5 = new IndexedUpdatePlanner(metadata);
             var c = planner5.Delete(q5, transaction);
             Assert.Equal(0, c);
             transaction.Commit();

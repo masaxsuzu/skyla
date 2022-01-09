@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Skyla.Engine.Buffers;
+using Skyla.Engine.Database;
 using Skyla.Engine.Exceptions;
 using Skyla.Engine.Files;
 using Skyla.Engine.Format;
@@ -18,30 +19,49 @@ namespace Skyla.Tests;
 
 public class Startup : IDisposable
 {
-    DirectoryInfo _dir;
+
+    private Dictionary<string, Server> _servers = new Dictionary<string, Server>();
 
     public Startup()
+    {
+        foreach (var item in new string[] { "test_db1", "test_db2" })
+        {
+            _servers.Add(item, New(item));
+        }
+    }
+
+    private Server New(string name)
     {
 #pragma warning disable CS8602
 #pragma warning disable CS8604
         var entryPath = Assembly.GetEntryAssembly()?.Location;
         var parent = new DirectoryInfo(entryPath).Parent;
-        var testPath = Path.Combine(parent.FullName, "test_db");
-        _dir = new DirectoryInfo(testPath);
-        if (!_dir.Exists)
+        var testPath = Path.Combine(parent.FullName, name);
+        var dir = new DirectoryInfo(testPath);
+        if (!dir.Exists)
         {
-            _dir.Create();
+            dir.Create();
         }
-        foreach (var file in _dir.GetFiles())
+        foreach (var file in dir.GetFiles())
         {
             file.Delete();
         }
+        var s = new Skyla.Engine.Database.Server(dir, 400, 8);
+
+        return s;
     }
     public void ConfigureServices(IServiceCollection services)
     {
-        var s = new Skyla.Engine.Database.Server(_dir, 400, 8);
-        services.AddSingleton(s);
+        services.AddSingleton(new ServerResolver(_servers));
 
+        foreach (var s in _servers)
+        {
+            Init(s.Value);
+        }
+    }
+
+    private void Init(Server s)
+    {
         // creating tables/views in separated tests can cause deadlocks.
         var parser = new Parser();
         var planner = new NaiveUpdatePlanner(s.Metadata);
@@ -77,11 +97,15 @@ public class Startup : IDisposable
 
     public void Dispose()
     {
-        foreach (var file in _dir.GetFiles())
+        foreach (var s in _servers)
         {
-            file.Delete();
+            var dir = s.Value.Directory;
+            foreach (var file in dir.GetFiles())
+            {
+                file.Delete();
+            }
+            dir.Delete();
         }
-        _dir.Delete();
     }
 
     public Schema CreateSchema(IFieldType[] fields)

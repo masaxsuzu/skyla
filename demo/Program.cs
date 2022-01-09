@@ -21,7 +21,21 @@ if(dir.Parent.Exists){
 
 var s = new Server(dir, 4096, 256);
 var tx = s.Create();
-var driver = new NaiveDriver(s, tx);
+
+NaiveDriver  driver; 
+if(1 < args.Length && args[0] == "naive")
+{
+    var queryPlanner = new NaiveQueryPlanner(new Parser(), s.Metadata);
+    var commandPlanner = new NaiveUpdatePlanner(s.Metadata);
+    var schemaPlanner = commandPlanner;
+    driver = new NaiveDriver(s, tx, queryPlanner, commandPlanner, schemaPlanner);
+}
+else {
+    var queryPlanner = new HeuristicQueryPlanner(s.Metadata);
+    var commandPlanner = new IndexedUpdatePlanner(s.Metadata);
+    var schemaPlanner = new NaiveUpdatePlanner(s.Metadata);
+    driver = new NaiveDriver(s, tx, queryPlanner, commandPlanner, schemaPlanner);
+}
 
 
 #pragma warning disable CS8622
@@ -56,7 +70,7 @@ foreach (var sample in samples)
     var ret = driver.Drive(sample);
 }
 
-foreach (var i in Enumerable.Range(0, 1000))
+foreach (var i in System.Linq.Enumerable.Range(0, 10000))
 {
     var ret = driver.Drive($"insert into a (x,y,z) values ({i}, '{(i % 10).ToString()}', '{(i % 100).ToString()}')");
 }

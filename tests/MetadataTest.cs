@@ -16,9 +16,9 @@ namespace Skyla.Tests;
 public class MetadataTest
 {
     private Skyla.Engine.Database.Server _server;
-    public MetadataTest(Skyla.Engine.Database.Server server)
+    public MetadataTest(ServerResolver r)
     {
-        _server = server;
+        _server = r.Resolve("test_db1");
     }
 
     [Fact]
